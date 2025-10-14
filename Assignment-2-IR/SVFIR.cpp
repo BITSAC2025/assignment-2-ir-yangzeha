@@ -1,22 +1,11 @@
 /**
  * SVFIR.cpp
  * @author kisslune
- * 
- * 编译方法示例（需替换为实际的SVF安装路径）：
- * g++ SVFIR.cpp -o svfir_generator \
- *   -I/path/to/SVF/include \
- *   -L/path/to/SVF/lib \
- *   -lSVFLLVM -lSVF -lz3 \
- *   `llvm-config --cxxflags --ldflags --system-libs --libs core`
+ * 功能：加载LLVM位码文件，生成并输出SVFIR(PAG)、调用图(Call Graph)和过程间控制流图(ICFG)
  */
 
 #include "Graphs/SVFG.h"
-#include "Graphs/PAG.h"
-#include "Graphs/ICFG.h"
-#include "Graphs/CallGraph.h"
 #include "SVF-LLVM/SVFIRBuilder.h"
-#include "Util/Options.h"
-#include "Util/PTAStat.h"
 
 using namespace SVF;
 using namespace llvm;
@@ -26,67 +15,50 @@ int main(int argc, char** argv)
 {
     int arg_num = 0;
     int extraArgc = 4;
+    // 分配参数数组（原始参数 + 额外默认参数）
     char** arg_value = new char*[argc + extraArgc];
+    
+    // 复制用户输入的原始参数
     for (; arg_num < argc; ++arg_num) {
         arg_value[arg_num] = argv[arg_num];
     }
-    std::vector<std::string> moduleNameVec;
 
+    // 添加默认分析参数
     int orgArgNum = arg_num;
-    arg_value[arg_num++] = (char*)"-model-arrays=true";
-    arg_value[arg_num++] = (char*)"-pre-field-sensitive=false";
-    arg_value[arg_num++] = (char*)"-model-consts=true";
-    arg_value[arg_num++] = (char*)"-stat=false";
-    assert(arg_num == (orgArgNum + extraArgc) && "more extra arguments? Change the value of extraArgc");
+    arg_value[arg_num++] = (char*)"-model-arrays=true";    // 启用数组建模
+    arg_value[arg_num++] = (char*)"-pre-field-sensitive=false";  // 禁用预字段敏感分析
+    arg_value[arg_num++] = (char*)"-model-consts=true";    // 启用常量建模
+    arg_value[arg_num++] = (char*)"-stat=false";           // 禁用统计信息输出
+    
+    // 验证参数数量正确性
+    assert(arg_num == (orgArgNum + extraArgc) && "参数数量不匹配，请调整extraArgc值");
 
-    // 解析命令行选项并获取模块名称
-    moduleNameVec = OptionBase::parseOptions(arg_num, arg_value, "SVF IR", "[options] <input-bitcode...>");
+    // 解析参数，获取输入的LLVM位码文件列表
+    std::vector<std::string> moduleNameVec = OptionBase::parseOptions(arg_num, arg_value, "SVF IR", "[options] <input-bitcode...>");
+    
+    // 释放动态分配的参数数组（修复内存泄漏）
+    delete[] arg_value;
 
-    // 构建LLVM模块集合
-    LLVMModuleSet* moduleSet = LLVMModuleSet::getLLVMModuleSet();
-    moduleSet->buildSVFModule(moduleNameVec);
+    // 加载LLVM位码文件，构建SVF模块
+    LLVMModuleSet::buildSVFModule(moduleNameVec);
 
-    // 实例化SVFIR构建器
+    // 创建SVFIR构建器并生成分析图
     SVFIRBuilder builder;
     cout << "Generating SVFIR(PAG), call graph and ICFG ..." << endl;
 
-    // 生成PAG (程序分配图)
-    PAG* pag = builder.build();
-    assert(pag && "Failed to build PAG!");
+    // 生成PAG（指针赋值图）并输出
+    auto pag = builder.build();
+    pag->dump();
 
-    // 生成调用图
-    CallGraph* callGraph = pag->getCallGraph();
-    assert(callGraph && "Failed to get CallGraph!");
+    // 生成调用图并输出
+    auto cg = pag->getCallGraph();
+    cg->dump();
 
-    // 生成ICFG ( interprocedural control-flow graph )
-    ICFG* icfg = pag->getICFG();
-    assert(icfg && "Failed to get ICFG!");
+    // 生成ICFG（过程间控制流图）并输出
+    auto icfg = pag->getICFG();
+    icfg->dump();
 
-    // 获取生成的SVFIR
-    SVFIR* svfir = SVFIR::getSVFIR();
-    assert(svfir && "Failed to get SVFIR!");
-
-    // 将图形结构导出到文件
-    cout << "Dumping graphs to files ..." << endl;
-    
-    // 导出PAG
-    pag->dump("pag.dot");
-    
-    // 导出调用图
-    callGraph->dump("callgraph.dot");
-    
-    // 导出ICFG
-    icfg->dump("icfg.dot");
-    
-    // 导出SVFIR
-    svfir->dump("svfir.dot");
-
-    // 释放资源
-    delete[] arg_value;
-    SVFIR::releaseSVFIR();
-    PAG::releasePAG();
+    // 释放LLVM模块资源
     LLVMModuleSet::releaseLLVMModuleSet();
-
-    cout << "All graphs generated successfully!" << endl;
     return 0;
 }
