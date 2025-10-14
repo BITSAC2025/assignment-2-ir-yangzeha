@@ -6,9 +6,6 @@
 #include "Graphs/SVFG.h"
 #include "SVF-LLVM/SVFIRBuilder.h"
 #include <Graphs/CallGraph.h>
-#include <vector>
-#include <string>
-#include <cassert>
 
 using namespace SVF;
 using namespace llvm;
@@ -16,48 +13,39 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    // 使用vector管理参数，避免手动内存管理
-    vector<string> args;
-    vector<char*> arg_ptrs;
-    
-    // 复制原始参数
-    for (int i = 0; i < argc; ++i) {
-        args.push_back(argv[i]);
+    int arg_num = 0;
+    int extraArgc = 4;
+    char** arg_value = new char*[argc + extraArgc];
+    for (; arg_num < argc; ++arg_num) {
+        arg_value[arg_num] = argv[arg_num];
     }
-    
-    // 添加额外参数
-    args.push_back("-model-arrays=true");
-    args.push_back("-pre-field-sensitive=false"); 
-    args.push_back("-model-consts=true");
-    args.push_back("-stat=false");
-    
-    // 准备char*数组
-    for (auto& arg : args) {
-        arg_ptrs.push_back(const_cast<char*>(arg.c_str()));
-    }
-    
-    // 解析选项
-    vector<string> moduleNameVec = OptionBase::parseOptions(
-        arg_ptrs.size(), arg_ptrs.data(), "SVF IR", "[options] <input-bitcode...>");
+    std::vector<std::string> moduleNameVec;
 
-    // 检查是否有输入模块
-    if (moduleNameVec.empty()) {
-        cerr << "Error: No input module specified" << endl;
-        return 1;
-    }
+    int orgArgNum = arg_num;
+    arg_value[arg_num++] = (char*)"-model-arrays=true";
+    arg_value[arg_num++] = (char*)"-pre-field-sensitive=false";
+    arg_value[arg_num++] = (char*)"-model-consts=true";
+    arg_value[arg_num++] = (char*)"-stat=false";
+    assert(arg_num == (orgArgNum + extraArgc) && "more extra arguments? Change the value of extraArgc");
+
+    moduleNameVec = OptionBase::parseOptions(arg_num, arg_value, "SVF IR", "[options] <input-bitcode...>");
 
     LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
+    // Instantiate an SVFIR builder
     SVFIRBuilder builder;
     cout << "Generating SVFIR(PAG), call graph and ICFG ..." << endl;
 
+    // TODO: here, generate SVFIR(PAG), call graph and ICFG, and dump them to files
+    //@{
     SVFIR* pag = builder.build();
     CallGraph* cg = pag->getCallGraph();
-    ICFG* icfg = pag->getICFG();
-    
+    ICFG* icgf = pag->getICFG();
     pag->dump();
-    cg->dump(); 
-    icfg->dump();
-    
+    cg->dump();
+    icgf->dump();
+
+    //@}
+
     return 0;
 }
