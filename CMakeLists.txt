@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(Assignments)
+# 在project()之后添加
+if(LLVM_VERSION_MAJOR VERSION_GREATER_EQUAL 16)
+    add_definitions(-DLLVM_16_OR_ABOVE=1)
+    # 添加其他LLVM 16特定的定义
+endif()
 
 if (DEFINED ENV{SVF_DIR})
     set(SVF_DIR $ENV{SVF_DIR})
