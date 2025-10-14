@@ -32,12 +32,9 @@ int main(int argc, char** argv)
 
     LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(moduleNameVec);
 
-    // Instantiate an SVFIR builder
     SVFIRBuilder builder;
     cout << "Generating SVFIR(PAG), call graph and ICFG ..." << endl;
 
-    // TODO: here, generate SVFIR(PAG), call graph and ICFG, and dump them to files
-    //@{
     SVFIR* pag = builder.build();
     CallGraph* cg = pag->getCallGraph();
     ICFG* icgf = pag->getICFG();
@@ -45,6 +42,5 @@ int main(int argc, char** argv)
     cg->dump();
     icgf->dump();
 
-    //@}
      return 0;
 }
