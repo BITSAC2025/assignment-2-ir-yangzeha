@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 ARGS="$@"
 
 rm -rf build/
@@ -11,5 +12,6 @@ if [ -n "$ARGS" ]; then
 else
   cmake -DCMAKE_BUILD_TYPE=Debug ..
 fi
+
 
 make -j4
