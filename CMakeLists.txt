@@ -100,7 +100,7 @@ if (DEFINED SUBDIRS)
         endif ()
     endforeach ()
 else ()
-    add_subdirectory(Assignment-2-IR)
+    # add_subdirectory(Assignment-2-IR)
 endif ()
 
 

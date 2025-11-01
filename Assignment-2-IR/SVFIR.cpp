@@ -39,7 +39,6 @@ int main(int argc, char** argv)
     // TODO: here, generate SVFIR(PAG), call graph and ICFG, and dump them to files
     //@{
     SVFIR* pag = builder.build();
-<<<<<<< HEAD
 
     // 修正1: getCallGraph() 返回的是const指针
     CallGraph* cg = const_cast<CallGraph*>(pag->getCallGraph());
@@ -49,14 +48,6 @@ int main(int argc, char** argv)
     pag->dump("pag");
     cg->dump("callgraph");
     icgf->dump("icfg");
-=======
-    CallGraph* cg = pag->getCallGraph();
-    ICFG* icgf = pag->getICFG();
-    pag->dump();
-    cg->dump();
-    icgf->dump();
-
->>>>>>> c45d1807e38603d8452c2b098160f9ab5193d5be
     //@}
 
     return 0;
