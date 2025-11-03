@@ -45,9 +45,10 @@ int main(int argc, char** argv)
     ICFG* icgf = pag->getICFG();
 
     // 修正2: dump()函数现在需要文件名参数
-    pag->dump("pag");
-    cg->dump("callgraph");
-    icgf->dump("icfg");
+    pag->dump();
+    cg->dump();
+    icgf->dump();
+
     //@}
 
     return 0;
