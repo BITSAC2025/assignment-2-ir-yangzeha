@@ -2,12 +2,6 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(Answers)
-project(Assignments)
-# 在project()之后添加
-if(LLVM_VERSION_MAJOR VERSION_GREATER_EQUAL 16)
-    add_definitions(-DLLVM_16_OR_ABOVE=1)
-    # 添加其他LLVM 16特定的定义
-endif()
 
 if (DEFINED ENV{SVF_DIR})
     set(SVF_DIR $ENV{SVF_DIR})
@@ -100,90 +94,8 @@ if (DEFINED SUBDIRS)
         endif ()
     endforeach ()
 else ()
-    # add_subdirectory(Assignment-2-IR)
+    add_subdirectory(Assignment-2-IR)
 endif ()
 
 
 
-add_subdirectory(Assignment-2-IR)
-
-## Add LLVM definitions to the compile options
-#add_definitions(${LLVM_DEFINITIONS})
-#include_directories(${LLVM_INCLUDE_DIRS})
-#
-## Add the LLVM include and library directories for all subsequent targets
-#separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-#include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
-#link_directories(${LLVM_LIBRARY_DIRS})
-#add_definitions(${LLVM_DEFINITIONS})
-#
-## Determine how to link with LLVM (dynamically with a single shared library or statically with multiple libraries)
-#if (LLVM_LINK_LLVM_DYLIB)
-#    message(STATUS "Linking to LLVM dynamic shared library object")
-#    set(llvm_libs LLVM)
-#else ()
-#    message(STATUS "Linking to separate LLVM static libraries")
-#    llvm_map_components_to_libnames(llvm_libs bitwriter core ipo irreader instcombine instrumentation target linker analysis scalaropts support)
-#endif ()
-#
-## Re-include AddLLVM module and configure LLVM/CMake settings
-#list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
-#include(AddLLVM)
-#
-## Configure additional compile options for RTTI and exception handling based on LLVM settings
-#if (NOT LLVM_ENABLE_RTTI)
-#    add_compile_options("-fno-rtti")
-#endif ()
-#if (NOT LLVM_ENABLE_EH)
-#    add_compile_options("-fno-exceptions")
-#endif ()
-#
-#
-## Set default build type to Release if not set
-#if (NOT CMAKE_BUILD_TYPE)
-#    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-#endif ()
-#
-## Warning if CMAKE_BUILD_TYPE is Debug but SVF_BUILD_TYPE is Release
-#if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND SVF_BUILD_TYPE STREQUAL "Release")
-#    message(WARNING "CMAKE_BUILD_TYPE=Debug but SVF_BUILD_TYPE=Release is not recommended.")
-#endif ()
-#
-## Set the SVF library components
-#set(SVF_LIB SvfLLVM SvfCore)
-#
-#
-## Add the Z3 include directory and link the Z3 library to all targets of SVF
-#set(CMAKE_INSTALL_RPATH ${Z3_INCLUDES})
-#link_libraries(${Z3_LIBRARIES})
-#include_directories(SYSTEM ${Z3_INCLUDES})
-#
-## ==============================================================================
-##                           SVF Ecosystem CMake Template
-## ==============================================================================
-##                 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-##   Everything above this line is a general CMake template for SVF ecosystem projects.
-##   Everything below this line is specific to this project (user/application code).
-## ==============================================================================
-#
-#
-##enable_testing()
-#
-#
-## Add subdirectories for various components of the project
-##add_subdirectory(HelloWorld)
-##add_subdirectory(SVFIR)
-##
-##add_subdirectory(Lab-Exercise-1)
-##add_subdirectory(Lab-Exercise-2)
-##add_subdirectory(Lab-Exercise-3)
-##set(GTRAV_DIR ${CMAKE_SOURCE_DIR}/Lab-Exercise-1/CPP)
-##set(Z3MGR_DIR ${CMAKE_SOURCE_DIR}/Lab-Exercise-2/CPP)
-##
-##add_subdirectory(Assignment-1/CPP)
-##add_subdirectory(Assignment-1/Python)
-##add_subdirectory(Assignment-2/CPP)
-##add_subdirectory(Assignment-2/Python)
-##add_subdirectory(Assignment-3/CPP)
-##add_subdirectory(Assignment-3/Python)
-#
